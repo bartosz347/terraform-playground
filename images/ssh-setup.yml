@@ -1,0 +1,29 @@
+---
+- name: 'Provision Image'
+  hosts: default
+  become: true
+
+  tasks:
+    - name: Set up authorized SSH keys
+      ansible.posix.authorized_key:
+        user: ubuntu
+        state: present
+        key: '{{ item }}'
+      with_file:
+        - config/public_keys/bw
+
+    - name: Disable Password Authentication
+      lineinfile:
+        dest=/etc/ssh/sshd_config
+        regexp='^PasswordAuthentication'
+        line="PasswordAuthentication no"
+        state=present
+        backup=yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      service:
+        name=sshd
+        state=restarted

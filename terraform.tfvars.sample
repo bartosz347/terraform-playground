@@ -1,0 +1,2 @@
+db_password                  = ""
+bastion_allowed_ssh_ip_block = "0.0.0.0/0"
