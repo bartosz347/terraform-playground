@@ -1,0 +1,3 @@
+do_token = ""
+domain   = "k8s.example.com"
+
