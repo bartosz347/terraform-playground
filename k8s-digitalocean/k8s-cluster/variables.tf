@@ -5,11 +5,3 @@ variable "do_token" {
 variable "cluster_name" {
   type = string
 }
-
-variable "ingress_loadbalancer_name" {
-  type = string
-}
-
-variable "domain" {
-  type = string
-}

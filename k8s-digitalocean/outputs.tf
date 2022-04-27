@@ -3,6 +3,6 @@ output "kube_config" {
   sensitive = true
 }
 
-output "load_balancer_name_from_helm" {
-  value = module.k8s_apps.provisioned_load_balancer_name
+output loadbalancer_public_ip {
+  value = module.k8s_app.loadbalancer_public_ip
 }

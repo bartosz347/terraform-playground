@@ -7,7 +7,7 @@ terraform {
 
     digitalocean = {
       source  = "digitalocean/digitalocean"
-      version = "2.18.0"
+      version = "2.19.0"
     }
   }
 }
@@ -78,4 +78,8 @@ resource "helm_release" "nginx_ingress" {
     name  = "controller.service.targetPorts.https"
     value = 80
   }
+}
+
+data digitalocean_loadbalancer "ingress_loadbalancer" {
+  name = jsondecode(helm_release.nginx_ingress.metadata[0].values).controller["service"]["annotations"]["service.beta.kubernetes.io/do-loadbalancer-name"]
 }

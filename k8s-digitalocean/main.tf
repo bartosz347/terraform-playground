@@ -11,17 +11,24 @@ module "k8s_cluster" {
   source   = "./k8s-cluster"
   do_token = var.do_token
 
-  cluster_name              = local.cluster_name
-  domain                    = var.domain
-  ingress_loadbalancer_name = module.k8s_apps.provisioned_load_balancer_name
+  cluster_name = local.cluster_name
 }
 
-module "k8s_apps" {
-  source   = "./k8s-apps"
+module "k8s_domain" {
+  source   = "./k8s-domain"
   do_token = var.do_token
 
   cluster_name              = module.k8s_cluster.cluster_name
   ingress_loadbalancer_name = local.ingress_loadbalancer_name
-  ssl_certificate_id        = module.k8s_cluster.ssl_certificate_id
+  domain                    = var.domain
+}
+
+module "k8s_app" {
+  source   = "./k8s-app"
+  do_token = var.do_token
+
+  cluster_name              = module.k8s_cluster.cluster_name
+  ingress_loadbalancer_name = local.ingress_loadbalancer_name
+  ssl_certificate_id        = module.k8s_domain.ssl_certificate_id
   domain                    = var.domain
 }
