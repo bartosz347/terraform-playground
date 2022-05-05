@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+</head>
+<body>
+<h3>Data from CloudFront headers:</h3>
+<div id="data"></div>
+<script>
+    const fetchData = async () => {
+        const response = await fetch("/location-info");
+        return Array.from(response.headers.entries())
+            .map(([key, value]) => ({key, value}))
+            .filter(({key}) => key.includes("data"));
+    }
+
+    fetchData().then(data => {
+        console.table(data)
+
+        document.getElementById("data").append(...data.reduce((prev, pair) => {
+            const par = document.createElement("p");
+            par.append(document.createTextNode(`${pair.key.replace('data-','')} = ${pair.value}`))
+            return [...prev, par]
+        }, []))
+    })
+</script>
+</body>
+</html>
