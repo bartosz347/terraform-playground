@@ -5,7 +5,3 @@ variable "do_token" {
 variable "domain" {
   type = string
 }
-
-variable "ingress_loadbalancer_name" {
-  type = string
-}

@@ -7,8 +7,12 @@ terraform {
   }
 }
 
-provider "digitalocean" {
-  token = var.do_token
+locals {
+  cluster_name = "${var.cluster_base_name}-${random_id.random_name_suffix.hex}"
+}
+
+resource "random_id" "random_name_suffix" {
+  byte_length = 5
 }
 
 resource "digitalocean_vpc" "k8s_vpc" {
@@ -22,7 +26,7 @@ data "digitalocean_kubernetes_versions" "version" {
 }
 
 resource "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
-  name    = var.cluster_name
+  name    = local.cluster_name
   region  = "fra1"
   version = data.digitalocean_kubernetes_versions.version.latest_version
   tags    = []

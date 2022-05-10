@@ -12,17 +12,13 @@ terraform {
   }
 }
 
-provider "digitalocean" {
-  token = var.do_token
-}
-
 data "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
   name = var.cluster_name
 }
 
 provider "kubernetes" {
-  host                   = data.digitalocean_kubernetes_cluster.kubernetes_cluster.endpoint
-  token                  = data.digitalocean_kubernetes_cluster.kubernetes_cluster.kube_config[0].token
+  host  = data.digitalocean_kubernetes_cluster.kubernetes_cluster.endpoint
+  token = data.digitalocean_kubernetes_cluster.kubernetes_cluster.kube_config[0].token
   cluster_ca_certificate = base64decode(
     data.digitalocean_kubernetes_cluster.kubernetes_cluster.kube_config[0].cluster_ca_certificate
   )
@@ -30,12 +26,16 @@ provider "kubernetes" {
 
 provider "helm" {
   kubernetes {
-    host                   = data.digitalocean_kubernetes_cluster.kubernetes_cluster.endpoint
-    token                  = data.digitalocean_kubernetes_cluster.kubernetes_cluster.kube_config[0].token
+    host  = data.digitalocean_kubernetes_cluster.kubernetes_cluster.endpoint
+    token = data.digitalocean_kubernetes_cluster.kubernetes_cluster.kube_config[0].token
     cluster_ca_certificate = base64decode(
       data.digitalocean_kubernetes_cluster.kubernetes_cluster.kube_config[0].cluster_ca_certificate
     )
   }
+}
+
+resource "random_id" "random_name_suffix" {
+  byte_length = 5
 }
 
 resource "helm_release" "nginx_ingress" {
@@ -48,7 +48,7 @@ resource "helm_release" "nginx_ingress" {
 
   set {
     name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/do-loadbalancer-name"
-    value = var.ingress_loadbalancer_name
+    value = "ingress-loadbalancer-${random_id.random_name_suffix.hex}"
   }
 
   set {
@@ -62,7 +62,7 @@ resource "helm_release" "nginx_ingress" {
   }
 
   set {
-    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/do-loadbalancer-certificate-id"
+    name = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/do-loadbalancer-certificate-id"
     # TODO: certificate id may change after renewal, but will be replaced automatically
     #       it may be necessary to ignore the id changes in Terraform
     #       https://docs.digitalocean.com/products/kubernetes/how-to/configure-load-balancers/#ssl-certificates
@@ -80,6 +80,6 @@ resource "helm_release" "nginx_ingress" {
   }
 }
 
-data digitalocean_loadbalancer "ingress_loadbalancer" {
+data "digitalocean_loadbalancer" "ingress_loadbalancer" {
   name = jsondecode(helm_release.nginx_ingress.metadata[0].values).controller["service"]["annotations"]["service.beta.kubernetes.io/do-loadbalancer-name"]
 }
