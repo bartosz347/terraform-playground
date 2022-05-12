@@ -1,3 +1,6 @@
+# TODO: rate limiting / cap on execution count ?
+# TODO: is it possible to fetch just a file instead of using this endpoint?
+
 terraform {
   required_providers {
     aws = {

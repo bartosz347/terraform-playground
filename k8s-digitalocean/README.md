@@ -1,3 +1,24 @@
+# TODO: try to use data sources instead of passing values; assume that full cluster name is known
+#  -> probably mocks can be removed
+
+# TODO: check out data source: remote state
+#  https://www.terraform.io/language/state/remote-state-data
+
+# TODO: TF cloud, triggers
+
+# TODO: Terraform cloud
+#  - move modules to separate repo (each module is a separate configuration)
+#  - use definitions in Terragrunt
+#  - use definitions in TF cloud (triggers)
+
+# TODO: Best practices: read about versioning providers
+
+TF Cloud: A) Git (no changes in code) B) manual (cloud conf block in each main.tf) C) A+B
+set Terraform working directory
+set observe only changes in a single directory
+
+---
+
 ## Info
 This Terraform configuration creates the following components:
 - VPC
