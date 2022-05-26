@@ -34,6 +34,10 @@ provider "helm" {
   }
 }
 
+data "digitalocean_certificate" "ssl_certificate" {
+  name = "wildcard-ssl-${var.domain}"
+}
+
 resource "random_id" "random_name_suffix" {
   byte_length = 5
 }
@@ -48,7 +52,7 @@ resource "helm_release" "nginx_ingress" {
 
   set {
     name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/do-loadbalancer-name"
-    value = "ingress-loadbalancer-${random_id.random_name_suffix.hex}"
+    value = "ingress-loadbalancer-${var.cluster_name}"
   }
 
   set {
@@ -66,7 +70,7 @@ resource "helm_release" "nginx_ingress" {
     # TODO: certificate id may change after renewal, but will be replaced automatically
     #       it may be necessary to ignore the id changes in Terraform
     #       https://docs.digitalocean.com/products/kubernetes/how-to/configure-load-balancers/#ssl-certificates
-    value = var.ssl_certificate_id
+    value = data.digitalocean_certificate.ssl_certificate.uuid
   }
 
   set {
@@ -80,6 +84,7 @@ resource "helm_release" "nginx_ingress" {
   }
 }
 
+# TODO: remove?
 data "digitalocean_loadbalancer" "ingress_loadbalancer" {
   name = jsondecode(helm_release.nginx_ingress.metadata[0].values).controller["service"]["annotations"]["service.beta.kubernetes.io/do-loadbalancer-name"]
 }

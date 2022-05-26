@@ -19,5 +19,5 @@ EOF
 }
 
 inputs = {
-  cluster_base_name = "kubernetes-cluster"
+  cluster_name = "kubernetes-cluster"
 }

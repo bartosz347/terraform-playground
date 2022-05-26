@@ -44,5 +44,31 @@ terraform import module.k8s_infra.digitalocean_loadbalancer.ingress_loadbalancer
 4. Adjust current configuration to match existing (`terraform plan` should print `No changes.`)
 5. Reconfigure LoadBalancer to use HTTPS
 
+### TODO next
+- [] Issues while destroying ? is it ok? order?
+- [] Prod and staging environments with Terragrunt
+- [] State stored on S3
+- [] State stored on TF cloud ?
 
+
+Changes
+# TODO: try to use data sources instead of passing values; assume that full cluster name is known
+#  -> probably mocks can be removed╷
+│ Error: Unable to find cluster with name: kubernetes-cluster
+│
+│   with data.digitalocean_kubernetes_cluster.kubernetes_cluster,
+│   on main.tf line 15, in data "digitalocean_kubernetes_cluster" "kubernetes_cluster":
+│   15: data "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
+│
+╵
+╷
+│ Error: Certificate wildcard-ssl-k8s.do.bwbw.eu not found
+│
+│   with data.digitalocean_certificate.ssl_certificate,
+│   on main.tf line 37, in data "digitalocean_certificate" "ssl_certificate":
+│   37: data "digitalocean_certificate" "ssl_certificate" {
+│
+╵
+
+---> still need to manually specify dependencies?
 

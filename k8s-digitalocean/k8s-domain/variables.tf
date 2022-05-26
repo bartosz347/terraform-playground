@@ -6,6 +6,6 @@ variable "domain" {
   type = string
 }
 
-variable "ingress_loadbalancer_name" {
+variable "cluster_name" {
   type = string
 }

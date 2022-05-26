@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-locals {
-  cluster_name = "${var.cluster_base_name}-${random_id.random_name_suffix.hex}"
-}
-
 resource "random_id" "random_name_suffix" {
   byte_length = 5
 }
@@ -26,7 +22,7 @@ data "digitalocean_kubernetes_versions" "version" {
 }
 
 resource "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
-  name    = local.cluster_name
+  name    = var.cluster_name
   region  = "fra1"
   version = data.digitalocean_kubernetes_versions.version.latest_version
   tags    = []

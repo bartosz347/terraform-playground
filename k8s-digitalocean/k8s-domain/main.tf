@@ -12,7 +12,7 @@ resource "digitalocean_domain" "default" {
 }
 
 data "digitalocean_loadbalancer" "ingress_loadbalancer" {
-  name = var.ingress_loadbalancer_name
+  name = "ingress-loadbalancer-${var.cluster_name}"
 }
 
 resource "digitalocean_record" "www" {
