@@ -8,6 +8,6 @@ dependency "k8s-cluster" {
 }
 
 dependency "k8s-ssl-cert" {
-  config_path = "../k8s-ssl-cert"
+  config_path = "../ssl-certs"
   skip_outputs = true
 }
