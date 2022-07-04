@@ -15,6 +15,10 @@ resource "digitalocean_vpc" "k8s_vpc" {
   name     = "k8s-vpc"
   region   = "fra1"
   ip_range = "10.0.0.0/24"
+
+  timeouts {
+    delete = "5m"
+  }
 }
 
 data "digitalocean_kubernetes_versions" "version" {
