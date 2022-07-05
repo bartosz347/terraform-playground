@@ -5,3 +5,9 @@ variable "do_token" {
 variable "cluster_name" {
   type = string
 }
+
+variable "node_count" {
+  type        = number
+  default     = 1
+  description = "Count of Kubernetes worker nodes"
+}

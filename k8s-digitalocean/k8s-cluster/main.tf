@@ -7,12 +7,8 @@ terraform {
   }
 }
 
-resource "random_id" "random_name_suffix" {
-  byte_length = 5
-}
-
 resource "digitalocean_vpc" "k8s_vpc" {
-  name     = "k8s-vpc"
+  name     = "${var.cluster_name}-vpc"
   region   = "fra1"
   ip_range = "10.0.0.0/24"
 
@@ -38,7 +34,7 @@ resource "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
     name       = "worker-pool"
     size       = "s-1vcpu-2gb"
     labels     = {}
-    node_count = 1
+    node_count = var.node_count
   }
 }
 
