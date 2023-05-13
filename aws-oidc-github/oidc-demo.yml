@@ -1,0 +1,92 @@
+name: Test OpenID Connect
+
+on:
+  workflow_dispatch:
+
+env:
+  REGION: "eu-central-1"
+  ROLE_1: ${{ vars.ROLE_1 }} # TODO get from Terraform output: arn:aws:iam::PRIMARY_ACCOUNT_ID:role/GitHubActionsOIDC
+  ROLE_2: ${{ vars.ROLE_2 }} # TODO get from Terraform output: arn:aws:iam::SECONDARY_ACCOUNT_ID:role/DevOpsOIDC
+  BUCKET_IN_PRIMARY_ACCOUNT: # TODO get from Terraform output: PREFIX-oidc-test-bucket-primary
+  BUCKET_IN_SECONDARY_ACCOUNT: # TODO get from Terraform output: PREFIX-oidc-test-bucket-secondary
+
+jobs:
+  access-aws:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Configure AWS credentials for Primary Account
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.REGION }}
+          role-to-assume: ${{ env.ROLE_1 }}
+
+      - name: Configure AWS Profile for Primary Account
+        shell: bash
+        run: |
+          aws configure set profile.primary.aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set profile.primary.aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set profile.primary.aws_session_token $AWS_SESSION_TOKEN
+          aws configure set profile.primary.region ${{ env.REGION }}
+          aws configure set profile.primary.output json
+
+      - name: Configure AWS credentials for Secondary Account
+        uses: aws-actions/configure-aws-credentials@main
+        with:
+          aws-region: ${{ env.REGION }}
+          role-to-assume: ${{ env.ROLE_2 }}
+          role-chaining: true
+          role-skip-session-tagging: true
+
+      - name: Configure AWS Profile for Secondary Account
+        shell: bash
+        run: |
+          aws configure set profile.secondary.aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set profile.secondary.aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set profile.secondary.aws_session_token $AWS_SESSION_TOKEN
+          aws configure set profile.secondary.region ${{ env.REGION }}
+          aws configure set profile.secondary.output json
+
+      # Enforce using credentials from profile instead of ENVs
+      - name: Cleanup ENVs
+        shell: bash
+        run: |
+          echo "AWS_ACCESS_KEY_ID=" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=" >> $GITHUB_ENV
+
+      # These steps should succeed
+      - name: List files in a private bucket in the Primary Account
+        env:
+          AWS_PROFILE: primary
+        shell: bash
+        run: |
+          aws sts get-caller-identity
+          aws s3 ls s3://${{ env.BUCKET_IN_PRIMARY_ACCOUNT }}
+
+      - name: List files in a private bucket in the Secondary Account
+        env:
+          AWS_PROFILE: secondary
+        shell: bash
+        run: |
+          aws sts get-caller-identity
+          aws s3 ls s3://${{ env.BUCKET_IN_SECONDARY_ACCOUNT }}
+
+      # These steps should fail
+      - name: List files in a private bucket in the Primary Account (should fail)
+        continue-on-error: true
+        env:
+          AWS_PROFILE: secondary
+        shell: bash
+        run: |
+          aws s3 ls s3://${{ env.BUCKET_IN_PRIMARY_ACCOUNT }}
+
+      - name: List files in a private bucket in the Secondary Account (should fail)
+        continue-on-error: true
+        env:
+          AWS_PROFILE: primary
+        shell: bash
+        run: |
+          aws s3 ls s3://${{ env.BUCKET_IN_SECONDARY_ACCOUNT }}
