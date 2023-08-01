@@ -27,16 +27,11 @@ resource "aws_iam_openid_connect_provider" "github" {
   # Audiences
   client_id_list = ["sts.amazonaws.com"]
 
-  # TODO: Follow the instruction to obtain a thumbprint: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
-  # The thumbprint may change over time (but rather rarely)
-  # Or use a data source (less secure):
-  # data.tls_certificate.github.certificates[0].sha1_fingerprint
-  #  data "tls_certificate" "github" {
-  #    url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
-  #  }
-  #
-  # thumbprint_list = data.tls_certificate.github.certificates[0].sha1_fingerprint
-  thumbprint_list = [lower("F879ABCE0008E4EB126E0097E46620F5AAAE26AD")]
+  # There is no need to configure trusted thumbprints,
+  # because AWS secures communication by trusting
+  # GitHub Actions’s trusted root certificate authorities (CAs)
+  # https://github.blog/changelog/2023-07-13-github-actions-oidc-integration-with-aws-no-longer-requires-pinning-of-intermediate-tls-certificates/
+  thumbprint_list = []
 }
 
 resource "aws_iam_role" "oidc_github_actions_primary" {
